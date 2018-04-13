@@ -1181,8 +1181,8 @@ export default class VideoPlayer extends Component {
 
                         style={[ styles.player.video, this.styles.videoStyle ]}
 
-                        source={{uri: 'file://'+this.props.source }}
-                    />
+                        source={{uri: this.props.stream ? this.props.source : 'file://'+this.props.source }}
+                        />
                     { this.renderError() }
                     { this.renderTopControls() }
                     { this.renderLoader() }
