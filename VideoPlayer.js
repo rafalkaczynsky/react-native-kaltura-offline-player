@@ -1203,7 +1203,7 @@ const styles = {
         container: {
             backgroundColor: '#000',
             flex: 1,
-            padding: 5,
+            padding: 0,
             paddingBottom: 0,
             paddingTop: 0,
             justifyContent: 'space-between',
