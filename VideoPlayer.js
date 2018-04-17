@@ -14,9 +14,11 @@ import {
   Slider,
   Image,
   View,
-  Text
+  Text,
+  TouchableOpacity
 } from 'react-native';
 import _ from 'lodash';
+import ModalView from './modal-view';
 
 export default class VideoPlayer extends Component {
   static defaultProps = {
@@ -48,7 +50,6 @@ export default class VideoPlayer extends Component {
       volume: this.props.volume,
       rate: this.props.rate,
       // Controls
-
       isFullscreen: this.props.resizeMode === 'cover' || false,
       showTimeRemaining: true,
       volumeTrackWidth: 0,
@@ -64,7 +65,10 @@ export default class VideoPlayer extends Component {
       loading: false,
       currentTime: 0,
       error: false,
-      duration: 0
+      duration: 0,
+
+      modalRateVisible: false,
+      rateSliderValue: 2
     };
 
     /**
@@ -423,9 +427,7 @@ export default class VideoPlayer extends Component {
   }
 
   _togglePlaybackRate() {
-    let state = this.state;
-    this.renderPlaybackRateSlider();
-    this.setState(state);
+    this.setState({ modalRateVisible: !this.state.modalRateVisible });
   }
 
   /**
@@ -923,28 +925,194 @@ export default class VideoPlayer extends Component {
     );
   }
 
+  renderMeterText(space, text, marginLeft, marginRight) {
+    return (
+      <View
+        style={{
+          flex: space,
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginLeft: marginLeft ? marginLeft : null,
+          marginRight: marginRight ? marginRight : null
+        }}
+      >
+        <Text style={{ color: 'black', fontSize: 12 }}>{text}</Text>
+      </View>
+    );
+  }
+
+  renderMeterTexts() {
+    return (
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}
+      >
+        {this.renderMeterText(1, '0.25x')}
+        {this.renderMeterText(2, '0.75x', 15, 0)}
+        {this.renderMeterText(2, 'Normal')}
+        {this.renderMeterText(2, '1.25x', 0, 15)}
+        {this.renderMeterText(1, '2x')}
+      </View>
+    );
+  }
+
+  renderMeterLine(space, marginLeft, marginRight) {
+    return (
+      <View
+        style={{
+          flex: space,
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginLeft: marginLeft ? marginLeft : null,
+          marginRight: marginRight ? marginRight : null
+        }}
+      >
+        <Image source={require('./assets/img/grey_line.png')} />
+      </View>
+    );
+  }
+
+  renderMeterLines() {
+    return (
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}
+      >
+        {this.renderMeterLine(1)}
+        {this.renderMeterLine(2, 15, 0)}
+        {this.renderMeterLine(2)}
+        {this.renderMeterLine(2, 0, 15)}
+        {this.renderMeterLine(1)}
+      </View>
+    );
+  }
   /**
    * Render PlaybackRate
    */
   renderPlaybackRateSlider() {
-      alert('works');
+    console.log('modalRateVisible' + this.state.modalRateVisible);
     return (
-      <View style={{width: 100, height: 100, backgroundColor: 'yellow'}}>
-        <Text style={{fontSize: 30}}>LALALALALA</Text>
-        <Slider
-          style={{ width: 200 , height: 50}}
-          disabled={false}
-          maximumValue={10}
-          minimumTrackTintColor={'yellow'}
-          minimumValue={0}
-          //onSlidingComplete
-          //onValueChange
-          step={1}
-          maximumTrackTintColor={'green'}
-          value={0}
-          thumbTintColor={'blue'}
-        />
-      </View>
+      <ModalView
+        visible={this.state.modalRateVisible}
+        style={{
+          position: 'absolute',
+          zIndex: 10000,
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, .5)',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}
+      >
+        <View
+          style={{
+            width: '90%',
+            backgroundColor: 'white',
+            flexDirection: 'column',
+            borderRadius: 15
+          }}
+        >
+          <View
+            style={{
+              width: '100%',
+              flexDirection: 'row',
+              borderBottomWidth: 1,
+              borderBottomColor: '#e3e3e3',
+              padding: 13,
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            <Text style={{ textAlign: 'center', color: 'black', fontSize: 17 }}>
+              Playback Speed
+            </Text>
+
+            <TouchableOpacity
+              onPress={() => this.setState({ modalRateVisible: false })}
+              style={{
+                position: 'absolute',
+                top: 13,
+                right: 13,
+                zIndex: 1000
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 20
+                }}
+              >
+                X
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View
+            style={{
+              alignItems: 'center',
+              padding: 10
+            }}
+          >
+            {/*
+          
+          */}
+            <Slider
+              style={{ width: '95%' }}
+              disabled={false}
+              maximumValue={4}
+              minimumTrackTintColor={'#c9c9c9'}
+              minimumValue={0}
+              //onSlidingComplete
+              onValueChange={value => {
+                let speedRate = 1;
+                switch (value) {
+                  case 0:
+                    speedRate = 0.25;
+                    break;
+                  case 1:
+                    speedRate = 0.75;
+                    break;
+                  case 2: // play
+                    speedRate = 1;
+                    break;
+                  case 3: // unregister
+                    speedRate = 1.25;
+                    break;
+                  case 4: // remove
+                    speedRate = 2;
+                    break;
+                  default:
+                    speedRate = 1;
+                    break;
+                }
+                this.setState({ rate: speedRate, rateSliderValue: value });
+              }}
+              step={1}
+              maximumTrackTintColor={'#c9c9c9'}
+              value={this.state.rateSliderValue}
+              thumbTintColor={'#094792'}
+            />
+            <View
+              style={{
+                width: '100%',
+                padding: 8,
+                marginTop: -8,
+                paddingBottom: 0,
+                flexDirection: 'column'
+              }}
+            >
+              {this.renderMeterLines()}
+              {this.renderMeterTexts()}
+            </View>
+          </View>
+        </View>
+      </ModalView>
     );
   }
   renderPlaybackRate() {
@@ -1146,12 +1314,19 @@ export default class VideoPlayer extends Component {
    * Provide all of our options and render the whole component.
    */
   render() {
+    console.log('this.state.rate')
+    console.log(this.state.rate)
+    
+    console.log('this.state.rateSliderValue')
+    console.log(this.state.rateSliderValue)
+
     return (
       <TouchableWithoutFeedback
         onPress={this.events.onScreenTouch}
         style={[styles.player.container, this.styles.containerStyle]}
       >
         <View style={[styles.player.container, this.styles.containerStyle]}>
+          {this.state.modalRateVisible && this.renderPlaybackRateSlider()}
           <Video
             {...this.props}
             ref={videoPlayer => (this.player.ref = videoPlayer)}
@@ -1329,7 +1504,7 @@ const styles = {
       textAlign: 'center'
     },
     timer: {
-      flex: 1
+      flex: 1.2
     },
     timerText: {
       backgroundColor: 'transparent',
