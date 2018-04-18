@@ -1314,12 +1314,7 @@ export default class VideoPlayer extends Component {
    * Provide all of our options and render the whole component.
    */
   render() {
-    console.log('this.state.rate')
-    console.log(this.state.rate)
-    
-    console.log('this.state.rateSliderValue')
-    console.log(this.state.rateSliderValue)
-
+  
     return (
       <TouchableWithoutFeedback
         onPress={this.events.onScreenTouch}
