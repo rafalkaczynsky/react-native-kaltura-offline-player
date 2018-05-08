@@ -1260,7 +1260,7 @@ export default class VideoPlayer extends Component {
    */
   renderTimer() {
     return this.renderControl(
-      <Text style={styles.controls.timerText}>{this.calculateTime()}</Text>,
+      <Text style={[styles.controls.timerText, {fontSize: this.props.small ? 8 : 11 }]}>{this.calculateTime()}</Text>,
       this.methods.toggleTimer,
       styles.controls.timer
     );
